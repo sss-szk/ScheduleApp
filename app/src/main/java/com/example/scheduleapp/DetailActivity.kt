@@ -26,6 +26,7 @@ class DetailActivity : AppCompatActivity() {
      */
     fun onUpdateButtonClick(view: View){
         //テストコメント
+        //テストコメント2
 
     }
 
