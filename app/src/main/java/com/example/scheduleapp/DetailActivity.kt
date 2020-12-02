@@ -25,7 +25,7 @@ class DetailActivity : AppCompatActivity(),
         //ヘルパーからDB接続オブジェクトを取得
         val db = helper.writableDatabase
         //INSERT用SQLの用意
-        val sql = "SELECT * FROM schedule WHERE _id = ${selectedId}"
+        val sql = "SELECT * FROM schedule WHERE _id = $selectedId"
         //sql実行
         val cursor = db.rawQuery(sql, null)
         cursor.moveToFirst()
@@ -67,7 +67,7 @@ class DetailActivity : AppCompatActivity(),
         //ヘルパーからDB接続オブジェクトを取得
         val db = helper.writableDatabase
         //INSERT用SQLの用意
-        val sqlUpdate = "UPDATE schedule SET date = ?,time = ?,desc = ? WHERE _id = ${selectedId}"
+        val sqlUpdate = "UPDATE schedule SET date = ?,time = ?,desc = ? WHERE _id = $selectedId"
         //プリペアドステートメントの取得
         val stmt = db.compileStatement(sqlUpdate)
         //変数のバインド

@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     private fun reloadListView(lv: ListView){
         //DBから取ってきた値をリスト表示
         val db = helper.writableDatabase
-        //TODO 表示された月の一覧のみ取得するよう調整
+        //TODO 表示された月の一覧のみ取得するよう調整したい
         val sql = "SELECT * FROM schedule ORDER BY date ASC , time ASC;"
         //SQL実行
         val cursor = db.rawQuery(sql,null)
@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         val to = intArrayOf(R.id.tvDateRow,R.id.tvTimeRow,R.id.tvDescRow,R.id.idPrimary)
         val adapter = SimpleCursorAdapter(applicationContext,R.layout.row,cursor,from,to,0)
         lv.adapter = adapter
+        db.close()
     }
 
     /**
