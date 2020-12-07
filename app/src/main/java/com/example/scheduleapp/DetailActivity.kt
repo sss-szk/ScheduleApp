@@ -47,6 +47,7 @@ class DetailActivity : AppCompatActivity(),
         tmpCalendar.time = sdf.parse(date)
         val calendar = findViewById<CalendarView>(R.id.calendarView)
         calendar.date = tmpCalendar.timeInMillis
+        selectedDate = sdf.format(calendar.date).toString()
         calendar.setOnDateChangeListener(DateChangeListener())
 
         //EditTextにセット
@@ -77,7 +78,7 @@ class DetailActivity : AppCompatActivity(),
         //プリペアドステートメントの取得
         val stmt = db.compileStatement(sqlUpdate)
         //変数のバインド
-        stmt.bindString(1, sdf.format(calendar.date).toString())
+        stmt.bindString(1, selectedDate)
         stmt.bindString(2, etTime.text.toString())
         stmt.bindString(3, etDesc.text.toString())
         //実行

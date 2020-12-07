@@ -22,6 +22,7 @@ class AddActivity : AppCompatActivity(),
         val calendar = findViewById<CalendarView>(R.id.calendarView)
         val sdf = SimpleDateFormat("yyyy/MM/dd")
         selectedDate = sdf.format(calendar.date)
+        calendar.setOnDateChangeListener(DateChangeListener())
 
         //時間入力欄の取得
         val etTime = findViewById<EditText>(R.id.etTime)
