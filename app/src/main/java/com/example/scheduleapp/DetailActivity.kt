@@ -3,16 +3,21 @@ package com.example.scheduleapp
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.CalendarView
 import android.widget.EditText
 import android.widget.Toast
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class DetailActivity : AppCompatActivity(),
-    DatePickerDialogFragment.OnSelectedDateListener,
     TimePickerDialogFragment.OnSelectedTimeListener {
 
     //DBヘルパー
     private val helper = DatabaseHelper(this@DetailActivity)
+
+    private var selectedDate = ""
+    private val sdf = SimpleDateFormat("yyyy/MM/dd")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,19 +41,20 @@ class DetailActivity : AppCompatActivity(),
         val time = cursor.getString(idxTime)
         val idxDesc = cursor.getColumnIndex("desc")
         val desc = cursor.getString(idxDesc)
+
+        //日付をcalendarViewにセット
+        val tmpCalendar:Calendar = Calendar.getInstance()
+        tmpCalendar.time = sdf.parse(date)
+        val calendar = findViewById<CalendarView>(R.id.calendarView)
+        calendar.date = tmpCalendar.timeInMillis
+        calendar.setOnDateChangeListener(DateChangeListener())
+
         //EditTextにセット
-        val etDate = findViewById<EditText>(R.id.etDate)
-        etDate.setText(date.toString())
         val etTime = findViewById<EditText>(R.id.etTime)
         etTime.setText(time.toString())
         val etDesc = findViewById<EditText>(R.id.etDesc)
         etDesc.setText(desc.toString())
         db.close()
-
-        //リスナの設定
-        etDate.setOnClickListener {
-            showDatePickerDialog()
-        }
 
         etTime.setOnClickListener{
             showTimePickerDialog()
@@ -60,7 +66,7 @@ class DetailActivity : AppCompatActivity(),
      */
     fun onUpdateButtonClick(view: View) {
         val selectedId = intent.getStringExtra("selectedId")
-        val etDate = findViewById<EditText>(R.id.etDate)
+        val calendar = findViewById<CalendarView>(R.id.calendarView)
         val etTime = findViewById<EditText>(R.id.etTime)
         val etDesc = findViewById<EditText>(R.id.etDesc)
 
@@ -71,7 +77,7 @@ class DetailActivity : AppCompatActivity(),
         //プリペアドステートメントの取得
         val stmt = db.compileStatement(sqlUpdate)
         //変数のバインド
-        stmt.bindString(1, etDate.text.toString())
+        stmt.bindString(1, sdf.format(calendar.date).toString())
         stmt.bindString(2, etTime.text.toString())
         stmt.bindString(3, etDesc.text.toString())
         //実行
@@ -104,15 +110,15 @@ class DetailActivity : AppCompatActivity(),
         finish()
     }
 
-    private fun showDatePickerDialog() {
-        val datePickerDialogFragment = DatePickerDialogFragment()
-        datePickerDialogFragment.show(supportFragmentManager, null)
-    }
-
-    override fun selectedDate(year: Int, month: Int, date: Int) {
-        val text = "$year/${month + 1}/$date"
-        val etDate = findViewById<EditText>(R.id.etDate)
-        etDate.setText(text)
+    /**
+     * カレンダーの日付を変えたときのリスナ
+     */
+    private inner class DateChangeListener : CalendarView.OnDateChangeListener{
+        override fun onSelectedDayChange(calendarView: CalendarView, year: Int, month: Int, dayOfMonth: Int) {
+            // monthは0起算のため+1します。
+            val displayMonth = month + 1
+            selectedDate = "$year/$displayMonth/$dayOfMonth"
+        }
     }
 
     private fun showTimePickerDialog() {

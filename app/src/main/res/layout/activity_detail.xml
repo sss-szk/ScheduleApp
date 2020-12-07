@@ -4,32 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="?attr/actionBarSize"
     tools:context=".DetailActivity">
 
-    <TextView
-        android:id="@+id/tvDate"
+    <CalendarView
+        android:id="@+id/calendarView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:text="@string/text_date"
-        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/etDate"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="24dp"
-        android:layout_weight="1"
-        android:ems="10"
-        android:inputType="date"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tvDate"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tvDate" />
 
     <EditText
         android:id="@+id/etTime"
@@ -53,7 +36,7 @@
         android:text="@string/text_time"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvDate" />
+        app:layout_constraintTop_toBottomOf="@+id/calendarView" />
 
     <TextView
         android:id="@+id/tvDesc"
