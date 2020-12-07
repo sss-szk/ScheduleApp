@@ -28,12 +28,6 @@ class MainActivity : AppCompatActivity() {
         //通知チャネルの設定
         createNotificationChannel()
 
-        //選択されている日付の初期値を設定
-        val calendar = findViewById<CalendarView>(R.id.calendarView)
-        val sdf = SimpleDateFormat("yyyy/MM/dd")
-        selectedDate = sdf.format(calendar.date)
-        calendar.setOnDateChangeListener(DateChangeListener())
-
         val lvMain = findViewById<ListView>(R.id.lvMain)
         //リストにリスナを設定
         lvMain.onItemClickListener = ListItemClickListener()
@@ -65,17 +59,6 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    /**
-     * カレンダーの日付を変えたときのリスナ
-     */
-    private inner class DateChangeListener : CalendarView.OnDateChangeListener{
-        override fun onSelectedDayChange(calendarView: CalendarView, year: Int, month: Int, dayOfMonth: Int) {
-            // monthは0起算のため+1します。
-            val displayMonth = month + 1
-            selectedDate = "$year/$displayMonth/$dayOfMonth"
         }
     }
 
@@ -119,7 +102,6 @@ class MainActivity : AppCompatActivity() {
      */
     fun onFABClick(view: View){
         val intent = Intent(applicationContext, AddActivity::class.java)
-        intent.putExtra("selectedDate",selectedDate)
         startActivity(intent)
     }
 
@@ -160,7 +142,6 @@ class MainActivity : AppCompatActivity() {
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         //通知を送る
         manager.notify(0,notification)
-
 
     }
 }
