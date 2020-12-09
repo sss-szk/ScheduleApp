@@ -26,7 +26,7 @@ class DetailActivity : AppCompatActivity(),
         //インテントからメイン画面で選択されたIDを取得
         val selectedId = intent.getStringExtra("selectedId")
 
-        //IDで検索してEditTextに入力しておく
+        //IDで検索して結果をEditTextに入力しておく
         //ヘルパーからDB接続オブジェクトを取得
         val db = helper.writableDatabase
         //INSERT用SQLの用意
@@ -42,12 +42,20 @@ class DetailActivity : AppCompatActivity(),
         val idxDesc = cursor.getColumnIndex("desc")
         val desc = cursor.getString(idxDesc)
 
+        //フィールドに日付をセット
+        selectedDate = date
+
         //日付をcalendarViewにセット
+        //Calendar型の変数を用意
         val tmpCalendar:Calendar = Calendar.getInstance()
+        //Calendarの日付を検索結果に合わせる
         tmpCalendar.time = sdf.parse(date)
+        //画面部品を取得
         val calendar = findViewById<CalendarView>(R.id.calendarView)
+        //画面部品に日付をセット
         calendar.date = tmpCalendar.timeInMillis
-        selectedDate = sdf.format(calendar.date).toString()
+
+        //画面部品にリスナをセット
         calendar.setOnDateChangeListener(DateChangeListener())
 
         //EditTextにセット
@@ -57,6 +65,7 @@ class DetailActivity : AppCompatActivity(),
         etDesc.setText(desc.toString())
         db.close()
 
+        //時間入力用のダイアログをセット
         etTime.setOnClickListener{
             showTimePickerDialog()
         }
@@ -66,8 +75,8 @@ class DetailActivity : AppCompatActivity(),
      * 更新ボタンが押されたときの処理
      */
     fun onUpdateButtonClick(view: View) {
+        //前画面で選択された行のプライマリIDをインテントから取得
         val selectedId = intent.getStringExtra("selectedId")
-        val calendar = findViewById<CalendarView>(R.id.calendarView)
         val etTime = findViewById<EditText>(R.id.etTime)
         val etDesc = findViewById<EditText>(R.id.etDesc)
 
@@ -85,8 +94,8 @@ class DetailActivity : AppCompatActivity(),
         stmt.executeUpdateDelete()
         db.close()
         Toast.makeText(applicationContext, R.string.toast_update, Toast.LENGTH_SHORT).show()
+        //アクティビティを閉じる
         finish()
-
     }
 
     /**
