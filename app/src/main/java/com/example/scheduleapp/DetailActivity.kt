@@ -141,4 +141,10 @@ class DetailActivity : AppCompatActivity(),
         val etTime = findViewById<EditText>(R.id.etTime)
         etTime.setText(text)
     }
+
+    override fun onDestroy() {
+        //ヘルパーオブジェクトの開放
+        helper.close()
+        super.onDestroy()
+    }
 }
