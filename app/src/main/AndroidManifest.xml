@@ -23,18 +23,17 @@
         <activity
             android:name=".AddActivity"
             android:label="@string/title_activity_add">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity
             android:name=".DetailActivity"
             android:label="@string/title_activity_detail">
-
         </activity>
+
+        <receiver
+            android:name=".AlarmReceiver"
+            android:process=":remote" >
+        </receiver>
 
     </application>
 
