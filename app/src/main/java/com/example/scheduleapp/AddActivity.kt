@@ -62,23 +62,24 @@ class AddActivity : AppCompatActivity(),
         //ヘルパーからDB接続オブジェクトを取得
         val db = helper.writableDatabase
         //INSERT用SQLの用意
-        val sqlInsert = "INSERT INTO schedule (date,time,desc) VALUES (?,?,?)"
+        val sqlInsert = "INSERT INTO schedule (date,time,description,update_time) VALUES (?,?,?,?)"
         //プリペアドステートメントの取得
         val stmt = db.compileStatement(sqlInsert)
         //変数のバインド
         stmt.bindString(1, selectedDate)
         stmt.bindString(2, etTimeText)
         stmt.bindString(3, etDescText)
+        //現在時刻をupdate_timeに入れる
+        val now = Date()
+        val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+        stmt.bindString(4,sdf.format(now).toString())
         //実行
         stmt.executeInsert()
         db.close()
 
-        //TODO 指定時刻に通知を出すように設定する
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = System.currentTimeMillis()
-        calendar.add(Calendar.SECOND, 10)
-        scheduleNotification("10秒後に届く通知です", calendar)
-
+        //今追加したスケジュールの通知をセットする
+        setNotificationToInsertedSchedule()
+        //Toast.makeText(applicationContext, R.string.toast_add, Toast.LENGTH_SHORT).show()
         finish()
     }
 
@@ -107,18 +108,56 @@ class AddActivity : AppCompatActivity(),
     /**
      * 指定した時間にintentを飛ばす処理
      */
-    private fun scheduleNotification(content: String, calendar: Calendar) {
+    private fun scheduleNotification(id: String,content: String, calendar: Calendar) {
         val notificationIntent = Intent(this@AddActivity, AlarmReceiver::class.java)
-        notificationIntent.putExtra(AlarmReceiver.NOTIFICATION_ID, 1)
+        //NOTIFICATION_ID = 通知固有のID
+        notificationIntent.putExtra(AlarmReceiver.NOTIFICATION_ID, id)
+        //NOTIFICATION_CONTENT = 通知の表示メッセージ
         notificationIntent.putExtra(AlarmReceiver.NOTIFICATION_CONTENT, content)
         val pendingIntent = PendingIntent.getBroadcast(
             this@AddActivity,
-            0,
+            id.toInt(), //アラームごとの固有ID
             notificationIntent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
         val alarmManager = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
-        //指定した時間になったらintentを飛ばす
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent)
+        //指定した時間になったらpendingIntentを飛ばす
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+    }
+
+    /**
+     * 今登録したスケジュールで通知を送るように設定する処理
+     */
+    private fun setNotificationToInsertedSchedule(){
+        //ヘルパーからDB接続オブジェクトを取得
+        val db = helper.writableDatabase
+        //全取得してupdate_timeが最新の行のデータ = 今登録したデータ
+        val sql = "SELECT * FROM schedule ORDER BY update_time DESC;"
+        //SQL実行
+        val cursor = db.rawQuery(sql,null)
+        cursor.moveToNext()
+        //通知作成に必要な情報を取得
+        val idIdx = cursor.getColumnIndex("_id")
+        val dateIdx = cursor.getColumnIndex("date")
+        val timeIdx = cursor.getColumnIndex("time")
+        val descIdx = cursor.getColumnIndex("description")
+        val id = cursor.getString(idIdx).toString()
+        val date = cursor.getString(dateIdx).toString()
+        val time = cursor.getString(timeIdx).toString()
+        val desc = cursor.getString(descIdx).toString()
+
+        //dateとtimeからcalendarを生成
+        val calendar = Calendar.getInstance()
+        //calendarにセットするためにsplitで分割した値を使う
+        val splitDate = date.split("/")
+        val splitTime = time.split(":")
+        //月は-1する
+        calendar.set(splitDate[0].toInt(), splitDate[1].toInt() - 1, splitDate[2].toInt(),
+            splitTime[0].toInt(), splitTime[1].toInt())
+
+        db.close()
+
+        //通知作成に必要なデータを渡す
+        scheduleNotification(id,desc,calendar)
     }
 }

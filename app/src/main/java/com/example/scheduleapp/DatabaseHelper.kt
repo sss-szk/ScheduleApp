@@ -21,7 +21,8 @@ class DatabaseHelper(context : Context): SQLiteOpenHelper(context, DATABASE_NAME
         sb.append("_id INTEGER PRIMARY KEY,")
         sb.append("date TEXT,")
         sb.append("time TEXT,")
-        sb.append("desc TEXT")
+        sb.append("description TEXT,")
+        sb.append("update_time TEXT")
         sb.append(");")
         val sql = sb.toString()
 

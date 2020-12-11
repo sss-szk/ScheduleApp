@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         //SQL実行
         val cursor = db.rawQuery(sql,null)
         //cursorに格納された結果をListViewに詰め替えて表示する処理
-        val from = arrayOf("date","time","desc","_id")
+        val from = arrayOf("date","time","description","_id")
         val to = intArrayOf(R.id.tvDateRow,R.id.tvTimeRow,R.id.tvDescRow,R.id.idPrimary)
         val adapter = SimpleCursorAdapter(applicationContext,R.layout.row,cursor,from,to,0)
         lv.adapter = adapter

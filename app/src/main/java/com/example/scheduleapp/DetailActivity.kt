@@ -39,7 +39,7 @@ class DetailActivity : AppCompatActivity(),
         val date = cursor.getString(idxDate)
         val idxTime = cursor.getColumnIndex("time")
         val time = cursor.getString(idxTime)
-        val idxDesc = cursor.getColumnIndex("desc")
+        val idxDesc = cursor.getColumnIndex("description")
         val desc = cursor.getString(idxDesc)
 
         //フィールドに日付をセット
@@ -83,7 +83,7 @@ class DetailActivity : AppCompatActivity(),
         //ヘルパーからDB接続オブジェクトを取得
         val db = helper.writableDatabase
         //INSERT用SQLの用意
-        val sqlUpdate = "UPDATE schedule SET date = ?,time = ?,desc = ? WHERE _id = $selectedId"
+        val sqlUpdate = "UPDATE schedule SET date = ?,time = ?,description = ? WHERE _id = $selectedId"
         //プリペアドステートメントの取得
         val stmt = db.compileStatement(sqlUpdate)
         //変数のバインド
