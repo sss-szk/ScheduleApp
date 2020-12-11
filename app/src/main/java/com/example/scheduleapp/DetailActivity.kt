@@ -1,11 +1,14 @@
 package com.example.scheduleapp
 
-import androidx.appcompat.app.AppCompatActivity
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.CalendarView
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -93,6 +96,11 @@ class DetailActivity : AppCompatActivity(),
         //実行
         stmt.executeUpdateDelete()
         db.close()
+
+        //通知の更新（通知を削除し、登録し直す）
+        deleteScheduledNotification(selectedId)
+        updateScheduledNotification(selectedId,selectedDate,etTime.text.toString(),etDesc.text.toString())
+
         Toast.makeText(applicationContext, R.string.toast_update, Toast.LENGTH_SHORT).show()
         //アクティビティを閉じる
         finish()
@@ -116,6 +124,8 @@ class DetailActivity : AppCompatActivity(),
         //実行
         stmt.executeUpdateDelete()
         db.close()
+        //設定されていたアラームを削除する
+        deleteScheduledNotification(selectedId)
         Toast.makeText(applicationContext, R.string.toast_delete, Toast.LENGTH_SHORT).show()
         finish()
     }
@@ -146,5 +156,64 @@ class DetailActivity : AppCompatActivity(),
         //ヘルパーオブジェクトの開放
         helper.close()
         super.onDestroy()
+    }
+
+    /**
+     * 設定されていた通知を削除する処理
+     */
+    private fun deleteScheduledNotification(id :String?){
+        val notificationIntent = Intent(this@DetailActivity, AlarmReceiver::class.java)
+        //NOTIFICATION_ID = 通知固有のID
+        notificationIntent.putExtra(AlarmReceiver.NOTIFICATION_ID, id)
+        val pendingIntent = id?.let {
+            PendingIntent.getBroadcast(
+                this@DetailActivity,
+                id.toInt(), //アラームごとの固有ID
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
+        //アラームの削除
+        val alarmManager = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(pendingIntent)
+    }
+
+    /**
+     * 指定した時間にintentを飛ばす処理
+     */
+    private fun scheduleNotification(id: String,content: String, calendar: Calendar) {
+        val notificationIntent = Intent(this@DetailActivity, AlarmReceiver::class.java)
+        //NOTIFICATION_ID = 通知固有のID
+        notificationIntent.putExtra(AlarmReceiver.NOTIFICATION_ID, id)
+        //NOTIFICATION_CONTENT = 通知の表示メッセージ
+        notificationIntent.putExtra(AlarmReceiver.NOTIFICATION_CONTENT, content)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this@DetailActivity,
+            id.toInt(), //アラームごとの固有ID
+            notificationIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT
+        )
+        val alarmManager = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
+        //指定した時間になったらpendingIntentを飛ばす
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+    }
+
+    /**
+     * 更新したスケジュールで通知を送るように設定する処理
+     */
+    private fun updateScheduledNotification(id: String?,date: String,time: String,desc: String){
+        //dateとtimeからcalendarを生成
+        val calendar = Calendar.getInstance()
+        //calendarにセットするためにsplitで分割した値を使う
+        val splitDate = date.split("/")
+        val splitTime = time.split(":")
+        //月は-1する
+        calendar.set(splitDate[0].toInt(), splitDate[1].toInt() - 1, splitDate[2].toInt(),
+            splitTime[0].toInt(), splitTime[1].toInt())
+
+        //通知作成に必要なデータを渡す
+        if (id != null) {
+            scheduleNotification(id,desc,calendar)
+        }
     }
 }

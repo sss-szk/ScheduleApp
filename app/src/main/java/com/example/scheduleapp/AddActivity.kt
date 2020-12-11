@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.CalendarView
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.*
@@ -78,8 +79,8 @@ class AddActivity : AppCompatActivity(),
         db.close()
 
         //今追加したスケジュールの通知をセットする
-        setNotificationToInsertedSchedule()
-        //Toast.makeText(applicationContext, R.string.toast_add, Toast.LENGTH_SHORT).show()
+        createScheduledNotification()
+        Toast.makeText(applicationContext, R.string.toast_add, Toast.LENGTH_SHORT).show()
         finish()
     }
 
@@ -118,7 +119,7 @@ class AddActivity : AppCompatActivity(),
             this@AddActivity,
             id.toInt(), //アラームごとの固有ID
             notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
         val alarmManager = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
         //指定した時間になったらpendingIntentを飛ばす
@@ -128,7 +129,7 @@ class AddActivity : AppCompatActivity(),
     /**
      * 今登録したスケジュールで通知を送るように設定する処理
      */
-    private fun setNotificationToInsertedSchedule(){
+    private fun createScheduledNotification(){
         //ヘルパーからDB接続オブジェクトを取得
         val db = helper.writableDatabase
         //全取得してupdate_timeが最新の行のデータ = 今登録したデータ
