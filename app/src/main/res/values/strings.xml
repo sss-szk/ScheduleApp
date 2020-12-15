@@ -16,6 +16,7 @@
     <string name="toast_delete">スケジュールを削除しました</string>
     <string name="delete_dialog_message">スケジュールを削除しますがよろしいですか？</string>
     <string name="notification_channel_name">スケジュールアプリ通知</string>
+    <string name="validation_error">時間を入力してください</string>
 
 
 </resources>
