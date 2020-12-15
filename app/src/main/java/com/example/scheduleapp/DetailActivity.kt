@@ -83,27 +83,38 @@ class DetailActivity : AppCompatActivity(),
         val etTime = findViewById<EditText>(R.id.etTime)
         val etDesc = findViewById<EditText>(R.id.etDesc)
 
-        //ヘルパーからDB接続オブジェクトを取得
-        val db = helper.writableDatabase
-        //INSERT用SQLの用意
-        val sqlUpdate = "UPDATE schedule SET date = ?,time = ?,description = ? WHERE _id = $selectedId"
-        //プリペアドステートメントの取得
-        val stmt = db.compileStatement(sqlUpdate)
-        //変数のバインド
-        stmt.bindString(1, selectedDate)
-        stmt.bindString(2, etTime.text.toString())
-        stmt.bindString(3, etDesc.text.toString())
-        //実行
-        stmt.executeUpdateDelete()
-        db.close()
+        var checkTimeText = true
+        checkTimeText = validationCheck(etTime)
 
-        //通知の更新（通知を削除し、登録し直す）
-        deleteScheduledNotification(selectedId)
-        updateScheduledNotification(selectedId,selectedDate,etTime.text.toString(),etDesc.text.toString())
+        if(checkTimeText){
+            //ヘルパーからDB接続オブジェクトを取得
+            val db = helper.writableDatabase
+            //INSERT用SQLの用意
+            val sqlUpdate =
+                "UPDATE schedule SET date = ?,time = ?,description = ? WHERE _id = $selectedId"
+            //プリペアドステートメントの取得
+            val stmt = db.compileStatement(sqlUpdate)
+            //変数のバインド
+            stmt.bindString(1, selectedDate)
+            stmt.bindString(2, etTime.text.toString())
+            stmt.bindString(3, etDesc.text.toString())
+            //実行
+            stmt.executeUpdateDelete()
+            db.close()
 
-        Toast.makeText(applicationContext, R.string.toast_update, Toast.LENGTH_SHORT).show()
-        //アクティビティを閉じる
-        finish()
+            //通知の更新（通知を削除し、登録し直す）
+            deleteScheduledNotification(selectedId)
+            updateScheduledNotification(
+                selectedId,
+                selectedDate,
+                etTime.text.toString(),
+                etDesc.text.toString()
+            )
+
+            Toast.makeText(applicationContext, R.string.toast_update, Toast.LENGTH_SHORT).show()
+            //アクティビティを閉じる
+            finish()
+        }
     }
 
     /**
@@ -215,5 +226,15 @@ class DetailActivity : AppCompatActivity(),
         if (id != null) {
             scheduleNotification(id,desc,calendar)
         }
+    }
+
+    private fun validationCheck(etTime:EditText) : Boolean{
+        if(etTime.text.toString().isEmpty()){
+            etTime.requestFocus()
+            //画面の下にToastエラーメッセージを表示
+            Toast.makeText(applicationContext, R.string.validation_error, Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
     }
 }

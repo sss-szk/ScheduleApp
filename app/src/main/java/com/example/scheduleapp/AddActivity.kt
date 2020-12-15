@@ -60,28 +60,33 @@ class AddActivity : AppCompatActivity(),
         val etDesc = findViewById<EditText>(R.id.etDesc)
         val etDescText = etDesc.text.toString()
 
-        //ヘルパーからDB接続オブジェクトを取得
-        val db = helper.writableDatabase
-        //INSERT用SQLの用意
-        val sqlInsert = "INSERT INTO schedule (date,time,description,update_time) VALUES (?,?,?,?)"
-        //プリペアドステートメントの取得
-        val stmt = db.compileStatement(sqlInsert)
-        //変数のバインド
-        stmt.bindString(1, selectedDate)
-        stmt.bindString(2, etTimeText)
-        stmt.bindString(3, etDescText)
-        //現在時刻をupdate_timeに入れる
-        val now = Date()
-        val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-        stmt.bindString(4,sdf.format(now).toString())
-        //実行
-        stmt.executeInsert()
-        db.close()
+        var checkTimeText = true
+        checkTimeText = validationCheck(etTime)
 
-        //今追加したスケジュールの通知をセットする
-        createScheduledNotification()
-        Toast.makeText(applicationContext, R.string.toast_add, Toast.LENGTH_SHORT).show()
-        finish()
+        if(checkTimeText){
+            //ヘルパーからDB接続オブジェクトを取得
+            val db = helper.writableDatabase
+            //INSERT用SQLの用意
+            val sqlInsert = "INSERT INTO schedule (date,time,description,update_time) VALUES (?,?,?,?)"
+            //プリペアドステートメントの取得
+            val stmt = db.compileStatement(sqlInsert)
+            //変数のバインド
+            stmt.bindString(1, selectedDate)
+            stmt.bindString(2, etTimeText)
+            stmt.bindString(3, etDescText)
+            //現在時刻をupdate_timeに入れる
+            val now = Date()
+            val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+            stmt.bindString(4,sdf.format(now).toString())
+            //実行
+            stmt.executeInsert()
+            db.close()
+
+            //今追加したスケジュールの通知をセットする
+            createScheduledNotification()
+            Toast.makeText(applicationContext, R.string.toast_add, Toast.LENGTH_SHORT).show()
+            finish()
+        }
     }
 
     override fun onDestroy() {
@@ -160,5 +165,15 @@ class AddActivity : AppCompatActivity(),
 
         //通知作成に必要なデータを渡す
         scheduleNotification(id,desc,calendar)
+    }
+
+    private fun validationCheck(etTime:EditText) : Boolean{
+        if(etTime.text.toString().isEmpty()){
+            etTime.requestFocus()
+            //画面の下にToastエラーメッセージを表示
+            Toast.makeText(applicationContext, R.string.validation_error, Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
     }
 }
